@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a69bd 0%, #1e3799 100%);
+            color: white;
+            padding: 0 40px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 6px;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .tab.active {
+            background: white;
+            color: #4a69bd;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: white;
+        }
+
+        .content-header {
+            padding: 30px 40px 20px;
+            border-bottom: 1px solid #e8ecef;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .add-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #219a52;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Task Table */
+        .table-container {
+            overflow-x: auto;
+            background: white;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .task-table th {
+            background: #f8f9fb;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c7b84;
+            border-bottom: 1px solid #e8ecef;
+        }
+
+        .task-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .task-table tr:hover {
+            background: #f8f9fb;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-in-progress {
+            background: #3498db;
+            color: white;
+        }
+
+        .status-not-started {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .status-complete {
+            background: #27ae60;
+            color: white;
+        }
+
+        .priority-high {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .priority-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .progress-text {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Gantt Chart */
+        .gantt-controls {
+            padding: 20px 40px;
+            background: #f8f9fb;
+            border-bottom: 1px solid #e8ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .gantt-btn {
+            padding: 8px 16px;
+            background: #4a69bd;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .gantt-btn:hover {
+            background: #3c5aa6;
+        }
+
+        .gantt-container {
+            background: white;
+            overflow-x: auto;
+        }
+
+        .gantt-header {
+            display: flex;
+            background: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .gantt-task-column {
+            width: 200px;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-right: 1px solid #34495e;
+            flex-shrink: 0;
+        }
+
+        .gantt-timeline {
+            display: flex;
+            flex: 1;
+            min-width: 1200px;
+        }
+
+        .gantt-month {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            border-right: 1px solid #34495e;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gantt-row {
+            display: flex;
+            border-bottom: 1px solid #f1f3f5;
+            min-height: 50px;
+            align-items: center;
+        }
+
+        .gantt-row:hover {
+            background: #f8f9fb;
+        }
+
+        .gantt-task-name {
+            width: 200px;
+            padding: 0 20px;
+            font-size: 14px;
+            color: #2c3e50;
+            border-right: 1px solid #e8ecef;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .gantt-bars {
+            flex: 1;
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            min-width: 1200px;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .gantt-bar.main-task {
+            background: #3498db;
+            height: 24px;
+        }
+
+        .gantt-bar.sub-task {
+            background: #27ae60;
+            height: 16px;
+        }
+
+        .current-day-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e74c3c;
+            z-index: 10;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            margin-right: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #6c7b84;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .expand-btn:hover {
+            color: #2c3e50;
+        }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1px;
+            background: #e8ecef;
+            min-height: calc(100vh - 160px);
+        }
+
+        .kanban-column {
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .kanban-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kanban-count {
+            background: #6c7b84;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .kanban-card {
+            background: #f8f9fb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
+            font-size: 13px;
+        }
+
+        .kanban-card h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .kanban-card .sub-task {
+            color: #6c7b84;
+            margin-bottom: 8px;
+        }
+
+        .kanban-card .assigned-to {
+            color: #6c7b84;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .kanban-card .progress {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .kanban-card .dates {
+            color: #6c7b84;
+            font-size: 11px;
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: #e8ecef;
+            min-height: calc(100vh - 160px);
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dashboard-card h3 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .dashboard-card p {
+            color: #6c7b84;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dashboard-card.completed h3 {
+            color: #27ae60;
+        }
+
+        .dashboard-card.in-progress h3 {
+            color: #3498db;
+        }
+
+        .dashboard-card.overdue h3 {
+            color: #e74c3c;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .confirm-modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .confirm-modal h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e8ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4a69bd;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #4a69bd;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3c5aa6;
+        }
+
+        .btn-secondary {
+            background: #6c7b84;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6c75;
+        }
+
+        .close {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6c7b84;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .header {
+                padding: 0 20px;
+                flex-direction: column;
+                height: auto;
+                padding: 15px 20px;
+            }
+
+            .main-content {
+                margin-top: 120px;
+            }
+
+            .tabs {
+                margin-top: 10px;
+            }
+
+            .content-header {
+                padding: 20px;
+            }
+
+            .gantt-container {
+                font-size: 12px;
+            }
+
+            .kanban-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .task-table {
+                font-size: 12px;
+            }
+
+            .task-table th,
+            .task-table td {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PROJECT MANAGEMENT SYSTEM</h1>
+        <div class="tabs">
+            <button class="tab active" data-tab="task-management">Task Management</button>
+            <button class="tab" data-tab="gantt-chart">Gantt Chart</button>
+            <button class="tab" data-tab="kanban-board">Kanban Board</button>
+            <button class="tab" data-tab="dashboard">Dashboard</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Task Management Tab -->
+        <div id="task-management" class="tab-content active">
+            <div class="content-header">
+                <h2 class="content-title">Project Tasks Overview</h2>
+                <button class="add-btn" data-action="add-task">+ Add New Task</button>
+            </div>
+            <div class="table-container">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th>Main Task</th>
+                            <th>Sub Task</th>
+                            <th>Description</th>
+                            <th>Assigned To</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="task-table-body">
+                        <!-- Tasks will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gantt Chart Tab -->
+        <div id="gantt-chart" class="tab-content">
+            <div class="content-header">
+                <h2 class="content-title">Project Timeline - Gantt Chart</h2>
+            </div>
+            <div class="gantt-controls">
+                <button class="gantt-btn" data-action="select-date">📅 Select Date Range</button>
+                <button class="gantt-btn" data-action="reset-view">🔄 Reset to Year View</button>
+            </div>
+            <div class="gantt-container" id="gantt-container">
+                <!-- Gantt chart will be populated here -->
+            </div>
+        </div>
+
+        <!-- Kanban Board Tab -->
+        <div id="kanban-board" class="tab-content">
+            <div class="content-header">
+                <h2 class="content-title">Kanban Board</h2>
+            </div>
+            <div class="kanban-board" id="kanban-board-container">
+                <!-- Kanban board will be populated here -->
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="content-header">
+                <h2 class="content-title">Project Dashboard</h2>
+            </div>
+            <div class="dashboard-grid" id="dashboard-grid">
+                <!-- Dashboard will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-action="close-modal">&times;</span>
+            <h2>Add New Task</h2>
+            <form id="addTaskForm">
+                <div class="form-group">
+                    <label for="mainTask">Main Task:</label>
+                    <input type="text" id="mainTask" name="mainTask" required>
+                </div>
+                <div class="form-group">
+                    <label for="subTask">Sub Task:</label>
+                    <input type="text" id="subTask" name="subTask">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="assignedTo">Assigned To:</label>
+                    <input type="text" id="assignedTo" name="assignedTo">
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" name="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priority:</label>
+                    <select id="priority" name="priority" required>
+                        <option value="">Select Priority</option>
+                        <option value="HIGH">High</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="LOW">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" name="status" required>
+                        <option value="">Select Status</option>
+                        <option value="NOT STARTED">Not Started</option>
+                        <option value="IN PROGRESS">In Progress</option>
+                        <option value="COMPLETE">Complete</option>
+                        <option value="ON HOLD">On Hold</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="progress">Progress (%):</label>
+                    <input type="number" id="progress" name="progress" min="0" max="100" value="0">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="confirm-modal-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this task?</p>
+            <div class="confirm-buttons">
+                <button class="btn btn-secondary" data-action="close-confirm">Cancel</button>
+                <button class="btn btn-primary" data-action="confirm-delete" style="background: #e74c3c;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let tasks = [
+            {
+                id: 1,
+                mainTask: "Test Task",
+                subTask: "Test Sub Task",
+                description: "This is a test task",
+                assignedTo: "John Doe",
+                startDate: "2025-01-01",
+                endDate: "2025-01-15",
+                priority: "HIGH",
+                status: "IN PROGRESS",
+                progress: 25
+            },
+            {
+                id: 2,
+                mainTask: "API Test Task",
+                subTask: "",
+                description: "",
+                assignedTo: "",
+                startDate: "2025-07-01",
+                endDate: "2025-07-15",
+                priority: "MEDIUM",
+                status: "NOT STARTED",
+                progress: 0
+            },
+            {
+                id: 3,
+                mainTask: "GRI",
+                subTask: "Collect",
+                description: "Phase 1",
+                assignedTo: "Sumon",
+                startDate: "2025-01-01",
+                endDate: "2025-01-15",
+                priority: "HIGH",
+                status: "IN PROGRESS",
+                progress: 25
+            },
+            {
+                id: 4,
+                mainTask: "GRI",
+                subTask: "ETL",
+                description: "",
+                assignedTo: "Sumon",
+                startDate: "2025-01-17",
+                endDate: "2025-01-23",
+                priority: "MEDIUM",
+                status: "NOT STARTED",
+                progress: 0
+            },
+            {
+                id: 5,
+                mainTask: "Data Management",
+                subTask: "Collect",
+                description: "",
+                assignedTo: "Chanasak",
+                startDate: "2025-06-01",
+                endDate: "2025-06-05",
+                priority: "LOW",
+                status: "COMPLETE",
+                progress: 100
+            },
+            {
+                id: 6,
+                mainTask: "Data Management",
+                subTask: "Data Cleansing",
+                description: "",
+                assignedTo: "Chanasak",
+                startDate: "2025-06-11",
+                endDate: "2025-06-18",
+                priority: "LOW",
+                status: "IN PROGRESS",
+                progress: 40
+            },
+            {
+                id: 7,
+                mainTask: "Data Management",
+                subTask: "Load to Database",
+                description: "",
+                assignedTo: "Chanasak",
+                startDate: "2025-06-20",
+                endDate: "2025-06-27",
+                priority: "LOW",
+                status: "NOT STARTED",
+                progress: 0
+            }
+        ];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            populateTaskTable();
+            populateGanttChart();
+            populateKanbanBoard();
+            populateDashboard();
+
+            // Add event listener for form submission
+            const form = document.getElementById('addTaskForm');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+            }
+
+            // Add event listener for modal close when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('addTaskModal');
+                if (event.target === modal) {
+                    closeAddTaskModal();
+                }
+            });
+        });
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const editingId = e.target.dataset.editingId;
+
+            // Validate required fields
+            const mainTask = formData.get('mainTask');
+            const startDate = formData.get('startDate');
+            const endDate = formData.get('endDate');
+            const priority = formData.get('priority');
+            const status = formData.get('status');
+
+            if (!mainTask || !startDate || !endDate || !priority || !status) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (editingId) {
+                // Update existing task
+                const taskIndex = tasks.findIndex(t => t.id == editingId);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex] = {
+                        id: parseInt(editingId),
+                        mainTask: mainTask,
+                        subTask: formData.get('subTask') || '',
+                        description: formData.get('description') || '',
+                        assignedTo: formData.get('assignedTo') || '',
+                        startDate: startDate,
+                        endDate: endDate,
+                        priority: priority,
+                        status: status,
+                        progress: parseInt(formData.get('progress')) || 0
+                    };
+                }
+            } else {
+                // Add new task
+                const newTask = {
+                    id: Date.now(),
+                    mainTask: mainTask,
+                    subTask: formData.get('subTask') || '',
+                    description: formData.get('description') || '',
+                    assignedTo: formData.get('assignedTo') || '',
+                    startDate: startDate,
+                    endDate: endDate,
+                    priority: priority,
+                    status: status,
+                    progress: parseInt(formData.get('progress')) || 0
+                };
+                tasks.push(newTask);
+            }
+
+            // Refresh all displays
+            populateTaskTable();
+            populateGanttChart();
+            populateKanbanBoard();
+            populateDashboard();
+            closeAddTaskModal();
+        }
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+
+            // Refresh content based on tab
+            if (tabName === 'gantt-chart') {
+                populateGanttChart();
+            } else if (tabName === 'kanban-board') {
+                populateKanbanBoard();
+            } else if (tabName === 'dashboard') {
+                populateDashboard();
+            }
+        }
+
+        // Task Management Functions
+        function populateTaskTable() {
+            const tbody = document.getElementById('task-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                
+                row.innerHTML = `
+                    <td>${task.mainTask}</td>
+                    <td>${task.subTask}</td>
+                    <td>${task.description}</td>
+                    <td>${task.assignedTo}</td>
+                    <td>${task.startDate}</td>
+                    <td>${task.endDate}</td>
+                    <td><span class="priority-${task.priority.toLowerCase()}">${task.priority}</span></td>
+                    <td><span class="status-badge status-${task.status.toLowerCase().replace(' ', '-')}">${task.status}</span></td>
+                    <td><span class="progress-text">${task.progress}%</span></td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteTaskById(${task.id})">Delete</button>
+                    </td>
+                `;
+                
+                // Add double click event for editing
+                row.addEventListener('dblclick', function(e) {
+                    // Don't edit if clicked on button
+                    if (e.target.tagName === 'BUTTON') return;
+                    editTask(task.id);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Global function for delete (accessible from onclick)
+        window.deleteTaskById = function(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks = tasks.filter(task => task.id !== taskId);
+                populateTaskTable();
+                populateGanttChart();
+                populateKanbanBoard();
+                populateDashboard();
+            }
+        };
+
+        function openAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'block';
+        }
+
+        function closeAddTaskModal() {
+            const modal = document.getElementById('addTaskModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            
+            const form = document.getElementById('addTaskForm');
+            if (form) {
+                form.reset();
+                delete form.dataset.editingId;
+            }
+            
+            // Reset modal for adding new tasks
+            const title = document.querySelector('#addTaskModal h2');
+            const button = document.querySelector('#addTaskModal .btn-primary');
+            if (title) title.textContent = 'Add New Task';
+            if (button) button.textContent = 'Add Task';
+        }
+
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            // Fill the form with existing data
+            const form = document.getElementById('addTaskForm');
+            if (!form) return;
+
+            const elements = {
+                mainTask: document.getElementById('mainTask'),
+                subTask: document.getElementById('subTask'),
+                description: document.getElementById('description'),
+                assignedTo: document.getElementById('assignedTo'),
+                startDate: document.getElementById('startDate'),
+                endDate: document.getElementById('endDate'),
+                priority: document.getElementById('priority'),
+                status: document.getElementById('status'),
+                progress: document.getElementById('progress')
+            };
+
+            if (elements.mainTask) elements.mainTask.value = task.mainTask;
+            if (elements.subTask) elements.subTask.value = task.subTask;
+            if (elements.description) elements.description.value = task.description;
+            if (elements.assignedTo) elements.assignedTo.value = task.assignedTo;
+            if (elements.startDate) elements.startDate.value = task.startDate;
+            if (elements.endDate) elements.endDate.value = task.endDate;
+            if (elements.priority) elements.priority.value = task.priority;
+            if (elements.status) elements.status.value = task.status;
+            if (elements.progress) elements.progress.value = task.progress;
+
+            // Change modal title and button text
+            const title = document.querySelector('#addTaskModal h2');
+            const button = document.querySelector('#addTaskModal .btn-primary');
+            if (title) title.textContent = 'Edit Task';
+            if (button) button.textContent = 'Update Task';
+
+            // Store the task ID for updating
+            form.dataset.editingId = taskId;
+
+            // Show modal
+            openAddTaskModal();
+        }
+
+        function closeAddTaskModal() {
+            document.getElementById('addTaskModal').style.display = 'none';
+            document.getElementById('addTaskForm').reset();
+            
+            // Reset modal for adding new tasks
+            document.querySelector('#addTaskModal h2').textContent = 'Add New Task';
+            document.querySelector('#addTaskModal .btn-primary').textContent = 'Add Task';
+            delete document.getElementById('addTaskForm').dataset.editingId;
+        }
+
+        // Test function to make sure JavaScript is working
+        console.log('JavaScript loaded successfully');
+        console.log('Tasks:', tasks);
+
+        // Handle form submission
+        // Note: This is now handled in the DOMContentLoaded event listener above
+
+        // Close modal when clicking outside
+        // Note: This is now handled in the DOMContentLoaded event listener above
+
+        // Gantt Chart Functions
+        function populateGanttChart() {
+            const container = document.getElementById('gantt-container');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<div style="padding: 40px; text-align: center; color: #6c7b84;">No tasks available. Add some tasks to see the Gantt chart.</div>';
+                return;
+            }
+
+            // Group tasks by main task
+            const groupedTasks = {};
+            tasks.forEach(task => {
+                if (!groupedTasks[task.mainTask]) {
+                    groupedTasks[task.mainTask] = [];
+                }
+                groupedTasks[task.mainTask].push(task);
+            });
+
+            // Generate months for the year 2025
+            const months = [
+                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ];
+
+            let html = `
+                <div class="gantt-header">
+                    <div class="gantt-task-column">Task</div>
+                    <div class="gantt-timeline">
+                        ${months.map(month => `<div class="gantt-month">${month}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Get current date for the red line
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentDay = now.getDate();
+            const daysInCurrentMonth = new Date(now.getFullYear(), currentMonth + 1, 0).getDate();
+            const currentPosition = (currentMonth + (currentDay / daysInCurrentMonth)) / 12 * 100;
+
+            Object.keys(groupedTasks).forEach(mainTaskName => {
+                const mainTasks = groupedTasks[mainTaskName];
+                const hasSubTasks = mainTasks.some(task => task.subTask);
+                
+                if (hasSubTasks) {
+                    // Main task row with expand/collapse
+                    html += `
+                        <div class="gantt-row">
+                            <div class="gantt-task-name">
+                                <button class="expand-btn" onclick="toggleMainTask('${mainTaskName}')">▶</button>
+                                ${mainTaskName}
+                            </div>
+                            <div class="gantt-bars" style="position: relative;">
+                                ${generateMainTaskBar(mainTasks)}
+                            </div>
+                        </div>
+                    `;
+
+                    // Sub task rows
+                    mainTasks.forEach(task => {
+                        if (task.subTask) {
+                            html += `
+                                <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}">
+                                    <div class="gantt-task-name" style="padding-left: 40px;">${task.subTask}</div>
+                                    <div class="gantt-bars" style="position: relative;">
+                                        ${generateTaskBar(task)}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                } else {
+                    // Single task without sub-tasks
+                    const task = mainTasks[0];
+                    html += `
+                        <div class="gantt-row">
+                            <div class="gantt-task-name">${task.mainTask}</div>
+                            <div class="gantt-bars" style="position: relative;">
+                                ${generateTaskBar(task)}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+
+            // Add current day line to all gantt-bars
+            const ganttBars = container.querySelectorAll('.gantt-bars');
+            ganttBars.forEach(bar => {
+                const currentLine = document.createElement('div');
+                currentLine.className = 'current-day-line';
+                currentLine.style.left = `${currentPosition}%`;
+                bar.appendChild(currentLine);
+            });
+        }
+
+        function generateMainTaskBar(tasks) {
+            // Find the earliest start date and latest end date
+            const startDates = tasks.map(task => new Date(task.startDate));
+            const endDates = tasks.map(task => new Date(task.endDate));
+            const earliestStart = new Date(Math.min(...startDates));
+            const latestEnd = new Date(Math.max(...endDates));
+
+            // Calculate average progress
+            const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
+            const avgProgress = Math.round(totalProgress / tasks.length);
+
+            const startMonth = earliestStart.getMonth();
+            const startDay = earliestStart.getDate();
+            const endMonth = latestEnd.getMonth();
+            const endDay = latestEnd.getDate();
+
+            const startPosition = (startMonth + (startDay / 30)) / 12 * 100;
+            const endPosition = (endMonth + (endDay / 30)) / 12 * 100;
+            const width = endPosition - startPosition;
+
+            return `
+                <div class="gantt-bar main-task" style="left: ${startPosition}%; width: ${width}%;">
+                    ${avgProgress}%
+                </div>
+            `;
+        }
+
+        function generateTaskBar(task) {
+            const startDate = new Date(task.startDate);
+            const endDate = new Date(task.endDate);
+            
+            const startMonth = startDate.getMonth();
+            const startDay = startDate.getDate();
+            const endMonth = endDate.getMonth();
+            const endDay = endDate.getDate();
+
+            // Calculate position as percentage of the year
+            const startPosition = (startMonth + (startDay / 30)) / 12 * 100;
+            const endPosition = (endMonth + (endDay / 30)) / 12 * 100;
+            const width = endPosition - startPosition;
+
+            return `
+                <div class="gantt-bar sub-task" style="left: ${startPosition}%; width: ${width}%;">
+                    ${task.progress}%
+                </div>
+            `;
+        }
+
+        function toggleMainTask(mainTaskName) {
+            const subTaskRows = document.querySelectorAll(`[data-main-task="${mainTaskName}"]`);
+            const expandBtn = event.target;
+            
+            subTaskRows.forEach(row => {
+                if (row.style.display === 'none') {
+                    row.style.display = 'flex';
+                    expandBtn.textContent = '▼';
+                } else {
+                    row.style.display = 'none';
+                    expandBtn.textContent = '▶';
+                }
+            });
+        }
+
+        function selectDateRange() {
+            // Show message in modal instead of alert
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 3000;
+                text-align: center;
+            `;
+            modal.innerHTML = `
+                <h3>Date Range Selection</h3>
+                <p>This feature would be implemented here</p>
+                <button onclick="this.parentElement.remove()" class="btn btn-primary" style="margin-top: 10px;">OK</button>
+            `;
+            document.body.appendChild(modal);
+            
+            setTimeout(() => {
+                if (modal.parentNode) modal.remove();
+            }, 3000);
+        }
+
+        function resetToYearView() {
+            populateGanttChart();
+        }
+
+        // Kanban Board Functions
+        function populateKanbanBoard() {
+            const container = document.getElementById('kanban-board-container');
+            
+            const statusColumns = {
+                'Not Started': tasks.filter(task => task.status === 'NOT STARTED'),
+                'In Progress': tasks.filter(task => task.status === 'IN PROGRESS'),
+                'On Hold': tasks.filter(task => task.status === 'ON HOLD'),
+                'Complete': tasks.filter(task => task.status === 'COMPLETE'),
+                'Overdue': [],
+                'Cancelled': tasks.filter(task => task.status === 'CANCELLED')
+            };
+
+            let html = '';
+            Object.keys(statusColumns).forEach(status => {
+                const statusTasks = statusColumns[status];
+                html += `
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            ${status}
+                            <span class="kanban-count">${statusTasks.length}</span>
+                        </div>
+                        ${statusTasks.map(task => `
+                            <div class="kanban-card">
+                                <h4>${task.mainTask}</h4>
+                                ${task.subTask ? `<div class="sub-task">${task.subTask}</div>` : ''}
+                                ${task.assignedTo ? `<div class="assigned-to"><strong>Assigned to:</strong> ${task.assignedTo}</div>` : ''}
+                                <div class="progress"><strong>Progress:</strong> ${task.progress}%</div>
+                                <div class="dates">${task.startDate} - ${task.endDate}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Dashboard Functions
+        function populateDashboard() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.status === 'COMPLETE').length;
+            const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS').length;
+            const overdueTasks = 0;
+
+            const container = document.getElementById('dashboard-grid');
+            container.innerHTML = `
+                <div class="dashboard-card">
+                    <h3>${totalTasks}</h3>
+                    <p>Total Tasks</p>
+                </div>
+                <div class="dashboard-card completed">
+                    <h3>${completedTasks}</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="dashboard-card in-progress">
+                    <h3>${inProgressTasks}</h3>
+                    <p>In Progress</p>
+                </div>
+                <div class="dashboard-card overdue">
+                    <h3>${overdueTasks}</h3>
+                    <p>Overdue</p>
+                </div>
+            `;
+        }
+        
+        // Test the system
+        console.log('Project Management System loaded successfully!', tasks.length, 'tasks found');
+    </script>
+</body>
+</html>
+                </div>
+                <div class="dashboard-card completed">
+                    <h3>${completedTasks}</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="dashboard-card in-progress">
+                    <h3>${inProgressTasks}</h3>
+                    <p>In Progress</p>
+                </div>
+                <div class="dashboard-card overdue">
+                    <h3>${overdueTasks}</h3>
+                    <p>Overdue</p>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        // Note: This is now handled in the DOMContentLoaded event listener above
+    </script>
+</body>
+</html>
