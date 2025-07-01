@@ -659,10 +659,10 @@
     <div class="header">
         <h1>PROJECT MANAGEMENT SYSTEM</h1>
         <div class="tabs">
-            <button class="tab active" data-tab="task-management">Task Management</button>
-            <button class="tab" data-tab="gantt-chart">Gantt Chart</button>
-            <button class="tab" data-tab="kanban-board">Kanban Board</button>
-            <button class="tab" data-tab="dashboard">Dashboard</button>
+            <button class="tab active" onclick="showTab('task-management', this)">Task Management</button>
+            <button class="tab" onclick="showTab('gantt-chart', this)">Gantt Chart</button>
+            <button class="tab" onclick="showTab('kanban-board', this)">Kanban Board</button>
+            <button class="tab" onclick="showTab('dashboard', this)">Dashboard</button>
         </div>
     </div>
 
@@ -671,7 +671,7 @@
         <div id="task-management" class="tab-content active">
             <div class="content-header">
                 <h2 class="content-title">Project Tasks Overview</h2>
-                <button class="add-btn" data-action="add-task">+ Add New Task</button>
+                <button class="add-btn" onclick="openAddTaskModal()">+ Add New Task</button>
             </div>
             <div class="table-container">
                 <table class="task-table">
