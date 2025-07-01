@@ -283,18 +283,6 @@
             background: #f8f9fb;
         }
 
-        .gantt-row[class*="main-task"] {
-            background: #2c3e50 !important;
-            color: white !important;
-            font-weight: 600 !important;
-            border-left: 3px solid #3498db !important;
-        }
-
-        .gantt-row[class*="main-task"] .gantt-task-name {
-            color: white !important;
-            font-weight: 600 !important;
-        }
-
         .gantt-row.main-task-row {
             background: #2c3e50 !important;
             color: white !important;
@@ -303,6 +291,10 @@
         }
 
         .gantt-row.main-task-row .gantt-task-name {
+            color: white !important;
+        }
+        
+        .gantt-row.main-task-row .expand-btn {
             color: white !important;
         }
 
@@ -355,6 +347,11 @@
             font-weight: 600;
             white-space: nowrap;
             z-index: 5;
+            line-height: 20px; /* Align with bar height */
+        }
+        
+        .main-task-row .gantt-progress-label {
+             color: white;
         }
 
         .current-day-line {
@@ -699,7 +696,6 @@
     </div>
 
     <div class="main-content">
-        <!-- Task Management Tab -->
         <div id="task-management" class="tab-content active">
             <div class="content-header">
                 <h2 class="content-title">Project Tasks Overview</h2>
@@ -722,13 +718,11 @@
                         </tr>
                     </thead>
                     <tbody id="task-table-body">
-                        <!-- Tasks will be populated here -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Gantt Chart Tab -->
         <div id="gantt-chart" class="tab-content">
             <div class="content-header">
                 <h2 class="content-title">Project Timeline - Gantt Chart</h2>
@@ -738,32 +732,26 @@
                 <button class="gantt-btn" onclick="resetToYearView()">🔄 Reset to Year View</button>
             </div>
             <div class="gantt-container" id="gantt-container">
-                <!-- Gantt chart will be populated here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Kanban Board Tab -->
         <div id="kanban-board" class="tab-content">
             <div class="content-header">
                 <h2 class="content-title">Kanban Board</h2>
             </div>
             <div class="kanban-board" id="kanban-board-container">
-                <!-- Kanban board will be populated here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content">
             <div class="content-header">
                 <h2 class="content-title">Project Dashboard</h2>
             </div>
             <div class="dashboard-grid" id="dashboard-grid">
-                <!-- Dashboard will be populated here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Add Task Modal -->
     <div id="addTaskModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeAddTaskModal()">&times;</span>
@@ -825,7 +813,6 @@
         </div>
     </div>
 
-    <!-- Confirm Delete Modal -->
     <div id="confirmModal" class="modal">
         <div class="confirm-modal-content">
             <h3>Confirm Delete</h3>
@@ -885,8 +872,8 @@
                 startDate: "2025-01-17",
                 endDate: "2025-01-23",
                 priority: "MEDIUM",
-                status: "NOT STARTED",
-                progress: 0
+                status: "IN PROGRESS",
+                progress: 10
             },
             {
                 id: 5,
@@ -1053,7 +1040,7 @@
                     <td>${task.startDate}</td>
                     <td>${task.endDate}</td>
                     <td><span class="priority-${task.priority.toLowerCase()}">${task.priority}</span></td>
-                    <td><span class="status-badge status-${task.status.toLowerCase().replace(' ', '-')}">${task.status}</span></td>
+                    <td><span class="status-badge status-${task.status.toLowerCase().replace(/ /g, '-')}">${task.status}</span></td>
                     <td><span class="progress-text">${task.progress}%</span></td>
                     <td>
                         <button class="delete-btn" onclick="deleteTaskById(${task.id})">Delete</button>
@@ -1148,26 +1135,6 @@
             openAddTaskModal();
         }
 
-        function closeAddTaskModal() {
-            document.getElementById('addTaskModal').style.display = 'none';
-            document.getElementById('addTaskForm').reset();
-            
-            // Reset modal for adding new tasks
-            document.querySelector('#addTaskModal h2').textContent = 'Add New Task';
-            document.querySelector('#addTaskModal .btn-primary').textContent = 'Add Task';
-            delete document.getElementById('addTaskForm').dataset.editingId;
-        }
-
-        // Test function to make sure JavaScript is working
-        console.log('JavaScript loaded successfully');
-        console.log('Tasks:', tasks);
-
-        // Handle form submission
-        // Note: This is now handled in the DOMContentLoaded event listener above
-
-        // Close modal when clicking outside
-        // Note: This is now handled in the DOMContentLoaded event listener above
-
         // Gantt Chart Functions
         function populateGanttChart() {
             const container = document.getElementById('gantt-container');
@@ -1203,10 +1170,17 @@
 
             // Get current date for the red line
             const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentDay = now.getDate();
-            const daysInCurrentMonth = new Date(now.getFullYear(), currentMonth + 1, 0).getDate();
-            const currentPosition = (currentMonth + (currentDay / daysInCurrentMonth)) / 12 * 100;
+            const currentYear = now.getFullYear();
+            let currentPosition = -1; // Default to not showing if not 2025
+
+            if (currentYear === 2025) {
+                const startOfYear = new Date('2025-01-01');
+                const endOfYear = new Date('2025-12-31');
+                const totalDaysInYear = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24);
+                const elapsedDays = (now - startOfYear) / (1000 * 60 * 60 * 24);
+                currentPosition = (elapsedDays / totalDaysInYear) * 100;
+            }
+
 
             Object.keys(groupedTasks).forEach(mainTaskName => {
                 const mainTasks = groupedTasks[mainTaskName];
@@ -1215,7 +1189,7 @@
                 if (hasSubTasks) {
                     // Main task row with expand/collapse
                     html += `
-                        <div class="gantt-row">
+                        <div class="gantt-row main-task-row">
                             <div class="gantt-task-name">
                                 <button class="expand-btn" onclick="toggleMainTask('${mainTaskName}')">▶</button>
                                 ${mainTaskName}
@@ -1230,7 +1204,7 @@
                     mainTasks.forEach(task => {
                         if (task.subTask) {
                             html += `
-                                <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}">
+                                <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}" style="display: none;">
                                     <div class="gantt-task-name" style="padding-left: 40px;">${task.subTask}</div>
                                     <div class="gantt-bars" style="position: relative;">
                                         ${generateTaskBar(task)}
@@ -1255,14 +1229,16 @@
 
             container.innerHTML = html;
 
-            // Add current day line to all gantt-bars
-            const ganttBars = container.querySelectorAll('.gantt-bars');
-            ganttBars.forEach(bar => {
-                const currentLine = document.createElement('div');
-                currentLine.className = 'current-day-line';
-                currentLine.style.left = `${currentPosition}%`;
-                bar.appendChild(currentLine);
-            });
+            // Add current day line to all gantt-bars if it's 2025
+            if (currentPosition >= 0) {
+                const ganttBars = container.querySelectorAll('.gantt-bars');
+                ganttBars.forEach(bar => {
+                    const currentLine = document.createElement('div');
+                    currentLine.className = 'current-day-line';
+                    currentLine.style.left = `${currentPosition}%`;
+                    bar.appendChild(currentLine);
+                });
+            }
         }
 
         function generateMainTaskBar(tasks) {
@@ -1274,21 +1250,22 @@
 
             // Calculate average progress
             const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
-            const avgProgress = Math.round(totalProgress / tasks.length);
+            const avgProgress = tasks.length > 0 ? Math.round(totalProgress / tasks.length) : 0;
 
-            const startMonth = earliestStart.getMonth();
-            const startDay = earliestStart.getDate();
-            const endMonth = latestEnd.getMonth();
-            const endDay = latestEnd.getDate();
+            const startOfYear = new Date('2025-01-01');
+            const endOfYear = new Date('2025-12-31');
+            const totalDaysInYear = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24);
 
-            const startPosition = (startMonth + (startDay / 30)) / 12 * 100;
-            const endPosition = (endMonth + (endDay / 30)) / 12 * 100;
-            const width = endPosition - startPosition;
+            const startDayOfYear = (earliestStart - startOfYear) / (1000 * 60 * 60 * 24);
+            const endDayOfYear = (latestEnd - startOfYear) / (1000 * 60 * 60 * 24);
+
+            const startPosition = (startDayOfYear / totalDaysInYear) * 100;
+            const width = ((endDayOfYear - startDayOfYear) / totalDaysInYear) * 100;
+            const labelPosition = startPosition + width;
 
             return `
-                <div class="gantt-bar main-task" style="left: ${startPosition}%; width: ${width}%;">
-                    ${avgProgress}%
-                </div>
+                <div class="gantt-bar main-task" style="left: ${startPosition}%; width: ${width}%;"></div>
+                <div class="gantt-progress-label" style="left: calc(${labelPosition}% + 5px);">${avgProgress}%</div>
             `;
         }
 
@@ -1296,20 +1273,20 @@
             const startDate = new Date(task.startDate);
             const endDate = new Date(task.endDate);
             
-            const startMonth = startDate.getMonth();
-            const startDay = startDate.getDate();
-            const endMonth = endDate.getMonth();
-            const endDay = endDate.getDate();
+            const startOfYear = new Date('2025-01-01');
+            const endOfYear = new Date('2025-12-31');
+            const totalDaysInYear = (endOfYear - startOfYear) / (1000 * 60 * 60 * 24);
 
-            // Calculate position as percentage of the year
-            const startPosition = (startMonth + (startDay / 30)) / 12 * 100;
-            const endPosition = (endMonth + (endDay / 30)) / 12 * 100;
-            const width = endPosition - startPosition;
+            const startDayOfYear = (startDate - startOfYear) / (1000 * 60 * 60 * 24);
+            const endDayOfYear = (endDate - startOfYear) / (1000 * 60 * 60 * 24);
+
+            const startPosition = (startDayOfYear / totalDaysInYear) * 100;
+            const width = ((endDayOfYear - startDayOfYear) / totalDaysInYear) * 100;
+            const labelPosition = startPosition + width;
 
             return `
-                <div class="gantt-bar sub-task" style="left: ${startPosition}%; width: ${width}%;">
-                    ${task.progress}%
-                </div>
+                <div class="gantt-bar sub-task" style="left: ${startPosition}%; width: ${width}%;"></div>
+                <div class="gantt-progress-label" style="left: calc(${labelPosition}% + 5px);">${task.progress}%</div>
             `;
         }
 
@@ -1424,30 +1401,6 @@
                 </div>
             `;
         }
-        
-        // Test the system
-        console.log('Project Management System loaded successfully!', tasks.length, 'tasks found');
-    </script>
-</body>
-</html>
-                </div>
-                <div class="dashboard-card completed">
-                    <h3>${completedTasks}</h3>
-                    <p>Completed</p>
-                </div>
-                <div class="dashboard-card in-progress">
-                    <h3>${inProgressTasks}</h3>
-                    <p>In Progress</p>
-                </div>
-                <div class="dashboard-card overdue">
-                    <h3>${overdueTasks}</h3>
-                    <p>Overdue</p>
-                </div>
-            `;
-        }
-
-        // Close modal when clicking outside
-        // Note: This is now handled in the DOMContentLoaded event listener above
     </script>
 </body>
 </html>
