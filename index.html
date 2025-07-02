@@ -171,12 +171,12 @@
             color: white;
         }
 
-        .status-on-hold { /* Added for Kanban/Dashboard */
+        .status-on-hold {
             background: #f39c12;
             color: white;
         }
 
-        .status-cancelled { /* Added for Kanban/Dashboard */
+        .status-cancelled {
             background: #e74c3c;
             color: white;
         }
@@ -223,7 +223,7 @@
             border-bottom: 1px solid #e8ecef;
             display: flex;
             gap: 10px;
-            flex-wrap: wrap; /* Added for responsiveness */
+            flex-wrap: wrap;
         }
 
         .gantt-btn {
@@ -244,7 +244,7 @@
         .gantt-container {
             background: white;
             overflow-x: auto;
-            min-height: 400px; /* Added min-height */
+            min-height: 400px;
         }
 
         .gantt-header {
@@ -254,7 +254,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            min-width: 1200px; /* Ensure header matches timeline width */
+            /* min-width will be set by JS dynamically */
         }
 
         .gantt-task-column {
@@ -271,7 +271,8 @@
         .gantt-timeline {
             display: flex;
             flex: 1;
-            min-width: 1000px; /* Adjusted minimum width for timeline section */
+            /* min-width will be set by JS dynamically */
+            position: relative; /* For vertical lines */
         }
 
         .gantt-month {
@@ -283,7 +284,22 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            min-width: 80px; /* Minimum width for each month cell */
+            min-width: 80px;
+            position: relative; /* For half-month lines */
+        }
+
+        /* Vertical lines for Gantt chart */
+        .gantt-vertical-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: rgba(0, 0, 0, 0.1); /* Lighter line for visual separation */
+            z-index: 1; /* Below bars */
+        }
+
+        .gantt-vertical-line.month-start {
+            background-color: rgba(0, 0, 0, 0.3); /* Darker line for month start */
         }
 
         .gantt-row {
@@ -291,7 +307,8 @@
             border-bottom: 1px solid #f1f3f5;
             min-height: 50px;
             align-items: center;
-            min-width: 1200px; /* Ensure row matches header width */
+            /* min-width will be set by JS dynamically */
+            position: relative; /* For vertical lines */
         }
 
         .gantt-row:hover {
@@ -299,7 +316,7 @@
         }
 
         .gantt-row.main-task-row {
-            background: #3c5aa6 !important; /* Adjusted color */
+            background: #4A4A4A !important; /* Changed to a mid-gray */
             color: white !important;
             font-weight: 600;
             border-left: 3px solid #3498db;
@@ -334,7 +351,7 @@
             height: 50px;
             display: flex;
             align-items: center;
-            min-width: 1000px; /* Adjusted minimum width for bars section */
+            /* min-width will be set by JS dynamically */
         }
 
         .gantt-bar {
@@ -362,7 +379,7 @@
             font-weight: 600;
             white-space: nowrap;
             z-index: 5;
-            line-height: 20px; /* Align with bar height */
+            line-height: 20px;
         }
         
         .main-task-row .gantt-progress-label {
@@ -390,7 +407,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0; /* Remove default padding */
+            padding: 0;
         }
 
         .expand-btn:hover {
@@ -526,8 +543,8 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
@@ -537,7 +554,7 @@
             width: 90%;
             max-width: 500px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative; /* For close button positioning */
+            position: relative;
         }
 
         .confirm-modal-content {
@@ -548,7 +565,7 @@
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
-            position: relative; /* For close button positioning */
+            position: relative;
         }
 
         .confirm-modal h3 {
@@ -636,7 +653,7 @@
         }
 
         .close {
-            position: absolute; /* Position close button */
+            position: absolute;
             top: 15px;
             right: 20px;
             font-size: 24px;
@@ -898,7 +915,7 @@
                 description: "Phase 1",
                 assignedTo: "Sumon",
                 startDate: "2025-01-01",
-                endDate: "2025-01-15",
+                endDate: "2025-01-31",
                 priority: "HIGH",
                 status: "IN PROGRESS",
                 progress: 25
@@ -909,8 +926,8 @@
                 subTask: "ETL",
                 description: "",
                 assignedTo: "Sumon",
-                startDate: "2025-01-17",
-                endDate: "2025-01-23",
+                startDate: "2025-02-01",
+                endDate: "2025-02-28",
                 priority: "MEDIUM",
                 status: "IN PROGRESS",
                 progress: 10
@@ -945,8 +962,8 @@
                 subTask: "Load to Database",
                 description: "",
                 assignedTo: "Chanasak",
-                startDate: "2025-06-20",
-                endDate: "2025-06-27",
+                startDate: "2025-07-01",
+                endDate: "2025-07-27",
                 priority: "LOW",
                 status: "NOT STARTED",
                 progress: 0
@@ -957,7 +974,7 @@
                 subTask: "Finish before due date",
                 description: "This task is intentionally overdue for demonstration.",
                 assignedTo: "Admin",
-                startDate: "2025-06-01",
+                startDate: "2025-05-01",
                 endDate: "2025-06-30", // This date is in the past relative to current date (July 2, 2025)
                 priority: "HIGH",
                 status: "IN PROGRESS",
@@ -973,7 +990,7 @@
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             populateTaskTable();
-            populateGanttChart(); // Initial call without specific dates, uses currentGanttStartDate/EndDate
+            resetToYearView(); // Call reset to ensure current year view on load
             populateKanbanBoard();
             populateDashboard();
 
@@ -1202,22 +1219,23 @@
         }
 
         // Gantt Chart Functions
+        const MONTH_WIDTH_PX = 80; // Define a consistent width for each month column
+
         function populateGanttChart(chartStartDate = currentGanttStartDate, chartEndDate = currentGanttEndDate) {
             const container = document.getElementById('gantt-container');
             if (!container) return;
             
-            // Clear existing content
-            container.innerHTML = '';
+            container.innerHTML = ''; // Clear existing content
 
-            if (tasks.length === 0) {
-                container.innerHTML = '<div style="padding: 40px; text-align: center; color: #6c7b84;">No tasks available. Add some tasks to see the Gantt chart.</div>';
-                return;
-            }
+            // Normalize dates to start/end of day
+            chartStartDate.setHours(0, 0, 0, 0);
+            chartEndDate.setHours(23, 59, 59, 999);
 
-            // Filter tasks based on the current chart date range
             const filteredTasks = tasks.filter(task => {
                 const taskStart = new Date(task.startDate);
                 const taskEnd = new Date(task.endDate);
+                taskStart.setHours(0,0,0,0);
+                taskEnd.setHours(23,59,59,999);
                 return (taskStart <= chartEndDate && taskEnd >= chartStartDate);
             });
 
@@ -1226,7 +1244,6 @@
                 return;
             }
 
-            // Group tasks by main task
             const groupedTasks = {};
             filteredTasks.forEach(task => {
                 if (!groupedTasks[task.mainTask]) {
@@ -1235,21 +1252,25 @@
                 groupedTasks[task.mainTask].push(task);
             });
 
-            // Generate months for the selected range
-            const monthsInView = [];
-            let tempDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), 1); // Start from the beginning of the month
+            const months = [];
+            let tempDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), 1);
             while (tempDate <= chartEndDate) {
-                monthsInView.push(tempDate.toLocaleString('en-US', { month: 'short', year: 'numeric' }));
+                months.push(new Date(tempDate)); // Store actual Date objects
                 tempDate.setMonth(tempDate.getMonth() + 1);
             }
-            // Ensure unique months and in order if the range is short
-            const uniqueMonths = [...new Set(monthsInView)].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
+            const totalMonths = months.length;
+            const timelineWidth = totalMonths * MONTH_WIDTH_PX;
+            const taskColumnWidth = 200; // Fixed width for task names
 
             let html = `
-                <div class="gantt-header">
+                <div class="gantt-header" style="min-width: ${taskColumnWidth + timelineWidth}px;">
                     <div class="gantt-task-column">Task</div>
-                    <div class="gantt-timeline" style="width: ${uniqueMonths.length * 80}px;"> ${uniqueMonths.map(month => `<div class="gantt-month">${month}</div>`).join('')}
+                    <div class="gantt-timeline" style="width: ${timelineWidth}px;">
+                        ${months.map(monthDate => {
+                            const monthName = monthDate.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                            return `<div class="gantt-month" style="width: ${MONTH_WIDTH_PX}px;">${monthName}</div>`;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -1259,40 +1280,40 @@
                 const hasSubTasks = mainTasks.some(task => task.subTask);
                 
                 if (hasSubTasks) {
-                    // Main task row with expand/collapse
                     html += `
-                        <div class="gantt-row main-task-row" data-main-task-group="${mainTaskName}">
+                        <div class="gantt-row main-task-row" data-main-task-group="${mainTaskName}" style="min-width: ${taskColumnWidth + timelineWidth}px;">
                             <div class="gantt-task-name">
                                 <button class="expand-btn" onclick="toggleMainTask('${mainTaskName}')">▶</button>
                                 ${mainTaskName}
                             </div>
-                            <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                ${generateMainTaskBar(mainTasks, chartStartDate, chartEndDate)}
+                            <div class="gantt-bars" style="width: ${timelineWidth}px;">
+                                ${generateVerticalGridLines(months, chartStartDate, chartEndDate)}
+                                ${generateMainTaskBar(mainTasks, chartStartDate, chartEndDate, timelineWidth)}
                             </div>
                         </div>
                     `;
 
-                    // Sub task rows
                     mainTasks.forEach(task => {
                         if (task.subTask) {
                             html += `
-                                <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}" style="display: none;">
+                                <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}" style="display: none; min-width: ${taskColumnWidth + timelineWidth}px;">
                                     <div class="gantt-task-name" style="padding-left: 40px;">${task.subTask}</div>
-                                    <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                        ${generateTaskBar(task, chartStartDate, chartEndDate)}
+                                    <div class="gantt-bars" style="width: ${timelineWidth}px;">
+                                        ${generateVerticalGridLines(months, chartStartDate, chartEndDate)}
+                                        ${generateTaskBar(task, chartStartDate, chartEndDate, timelineWidth)}
                                     </div>
                                 </div>
                             `;
                         }
                     });
                 } else {
-                    // Single task without sub-tasks
-                    const task = mainTasks[0]; // Assuming only one task if no subtask
+                    const task = mainTasks[0];
                     html += `
-                        <div class="gantt-row">
+                        <div class="gantt-row" style="min-width: ${taskColumnWidth + timelineWidth}px;">
                             <div class="gantt-task-name">${task.mainTask}</div>
-                            <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                ${generateTaskBar(task, chartStartDate, chartEndDate)}
+                            <div class="gantt-bars" style="width: ${timelineWidth}px;">
+                                ${generateVerticalGridLines(months, chartStartDate, chartEndDate)}
+                                ${generateTaskBar(task, chartStartDate, chartEndDate, timelineWidth)}
                             </div>
                         </div>
                     `;
@@ -1303,103 +1324,132 @@
 
             // Add current day line
             const now = new Date();
+            now.setHours(0, 0, 0, 0); // Normalize current date
             const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
             const elapsedDays = (now.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
             
-            // Only show line if current date is within the chart range
             if (now >= chartStartDate && now <= chartEndDate && totalDaysInChart > 0) {
-                const currentPosition = (elapsedDays / totalDaysInChart) * 100;
-                const ganttBars = container.querySelectorAll('.gantt-bars');
-                ganttBars.forEach(bar => {
+                const currentPosition = (elapsedDays / totalDaysInChart) * timelineWidth; // Position in px
+                const ganttBarsElements = container.querySelectorAll('.gantt-bars');
+                ganttBarsElements.forEach(bar => {
                     const currentLine = document.createElement('div');
                     currentLine.className = 'current-day-line';
-                    currentLine.style.left = `${currentPosition}%`;
+                    currentLine.style.left = `${currentPosition}px`;
                     bar.appendChild(currentLine);
                 });
             }
         }
 
-        function generateMainTaskBar(tasks, chartStartDate, chartEndDate) {
-            // Find the earliest start date and latest end date among subtasks
+        // Helper to generate vertical grid lines for each row
+        function generateVerticalGridLines(months, chartStartDate, chartEndDate) {
+            let linesHtml = '';
+            const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
+            
+            months.forEach(monthDate => {
+                // Line for start of month
+                const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+                const startDayInChart = (monthStart.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
+                const startPosition = (startDayInChart / totalDaysInChart) * 100;
+                linesHtml += `<div class="gantt-vertical-line month-start" style="left: ${startPosition}%;"></div>`;
+
+                // Line for mid-month (approx. 15th)
+                const midMonthDay = Math.min(15, new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate()); // Ensure 15th exists
+                const midMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), midMonthDay);
+                const midDayInChart = (midMonth.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
+                const midPosition = (midDayInChart / totalDaysInChart) * 100;
+                linesHtml += `<div class="gantt-vertical-line" style="left: ${midPosition}%;"></div>`;
+            });
+            return linesHtml;
+        }
+
+
+        function generateMainTaskBar(tasks, chartStartDate, chartEndDate, timelineWidth) {
             const startDates = tasks.map(task => new Date(task.startDate));
             const endDates = tasks.map(task => new Date(task.endDate));
             const earliestStart = new Date(Math.min(...startDates));
             const latestEnd = new Date(Math.max(...endDates));
 
-            // Calculate average progress
             const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
             const avgProgress = tasks.length > 0 ? Math.round(totalProgress / tasks.length) : 0;
 
             const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDaysInChart === 0) return ''; // Avoid division by zero
+            if (totalDaysInChart <= 0) return ''; // Avoid division by zero or negative range
 
+            // Calculate start and end days relative to chart start
             const startDayInChart = (earliestStart.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
             const endDayInChart = (latestEnd.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
 
-            // Clamp positions to ensure they are within [0, totalDaysInChart]
+            // Clamp positions to ensure they are within the visible chart range
             const actualStartDay = Math.max(0, startDayInChart);
             const actualEndDay = Math.min(totalDaysInChart, endDayInChart);
 
-            const startPosition = (actualStartDay / totalDaysInChart) * 100;
-            const width = ((actualEndDay - actualStartDay) / totalDaysInChart) * 100;
+            // Calculate position and width in pixels
+            const startPositionPx = (actualStartDay / totalDaysInChart) * timelineWidth;
+            const widthPx = ((actualEndDay - actualStartDay) / totalDaysInChart) * timelineWidth;
             
-            // Adjust label position to be outside the bar if it's too narrow
-            const labelOffset = (width < 10) ? 5 : 0; // If bar is too small, offset label
-            const labelPosition = startPosition + width + labelOffset;
-
-            // Ensure label doesn't go off screen
-            const safeLabelPosition = Math.min(95, labelPosition); // Max 95% to leave room
+            // Adjust label position
+            let labelPositionPx = startPositionPx + widthPx;
+            const minLabelSpace = 30; // Minimum pixels needed for label
+            if (widthPx < minLabelSpace) {
+                labelPositionPx += minLabelSpace - widthPx; // Move label outside if bar is too small
+            }
 
             return `
-                <div class="gantt-bar main-task" style="left: ${startPosition}%; width: ${width > 0 ? width : 0}%;"></div>
-                <div class="gantt-progress-label" style="left: calc(${safeLabelPosition}% + 5px);">${avgProgress}%</div>
+                <div class="gantt-bar main-task" style="left: ${startPositionPx}px; width: ${widthPx > 0 ? widthPx : 0}px;"></div>
+                <div class="gantt-progress-label" style="left: ${labelPositionPx + 5}px;">${avgProgress}%</div>
             `;
         }
 
-        function generateTaskBar(task, chartStartDate, chartEndDate) {
+        function generateTaskBar(task, chartStartDate, chartEndDate, timelineWidth) {
             const startDate = new Date(task.startDate);
             const endDate = new Date(task.endDate);
             
             const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDaysInChart === 0) return ''; // Avoid division by zero
+            if (totalDaysInChart <= 0) return ''; // Avoid division by zero or negative range
 
+            // Calculate start and end days relative to chart start
             const startDayInChart = (startDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
             const endDayInChart = (endDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
 
-            // Clamp positions to ensure they are within [0, totalDaysInChart]
+            // Clamp positions to ensure they are within the visible chart range
             const actualStartDay = Math.max(0, startDayInChart);
             const actualEndDay = Math.min(totalDaysInChart, endDayInChart);
 
-            const startPosition = (actualStartDay / totalDaysInChart) * 100;
-            const width = ((actualEndDay - actualStartDay) / totalDaysInChart) * 100;
+            // Calculate position and width in pixels
+            const startPositionPx = (actualStartDay / totalDaysInChart) * timelineWidth;
+            const widthPx = ((actualEndDay - actualStartDay) / totalDaysInChart) * timelineWidth;
 
-            // Adjust label position to be outside the bar if it's too narrow
-            const labelOffset = (width < 10) ? 5 : 0; // If bar is too small, offset label
-            const labelPosition = startPosition + width + labelOffset;
-
-            // Ensure label doesn't go off screen
-            const safeLabelPosition = Math.min(95, labelPosition); // Max 95% to leave room
-
+            // Adjust label position
+            let labelPositionPx = startPositionPx + widthPx;
+            const minLabelSpace = 30; // Minimum pixels needed for label
+            if (widthPx < minLabelSpace) {
+                labelPositionPx += minLabelSpace - widthPx; // Move label outside if bar is too small
+            }
 
             return `
-                <div class="gantt-bar sub-task" style="left: ${startPosition}%; width: ${width > 0 ? width : 0}%;"></div>
-                <div class="gantt-progress-label" style="left: calc(${safeLabelPosition}% + 5px);">${task.progress}%</div>
+                <div class="gantt-bar sub-task" style="left: ${startPositionPx}px; width: ${widthPx > 0 ? widthPx : 0}px;"></div>
+                <div class="gantt-progress-label" style="left: ${labelPositionPx + 5}px;">${task.progress}%</div>
             `;
         }
 
+
         function toggleMainTask(mainTaskName) {
             const subTaskRows = document.querySelectorAll(`[data-main-task="${mainTaskName}"]`);
-            // Find the button directly within the main task row
             const mainTaskRow = document.querySelector(`[data-main-task-group="${mainTaskName}"]`);
             const expandBtn = mainTaskRow ? mainTaskRow.querySelector('.expand-btn') : null;
             
+            let isExpanded = false;
+            if (subTaskRows.length > 0 && subTaskRows[0].style.display !== 'none') {
+                isExpanded = true;
+            }
+
             subTaskRows.forEach(row => {
-                if (row.style.display === 'none') {
-                    row.style.display = 'flex';
-                    if (expandBtn) expandBtn.textContent = '▼';
-                } else {
+                if (isExpanded) {
                     row.style.display = 'none';
                     if (expandBtn) expandBtn.textContent = '▶';
+                } else {
+                    row.style.display = 'flex';
+                    if (expandBtn) expandBtn.textContent = '▼';
                 }
             });
         }
@@ -1426,10 +1476,8 @@
             const newStartDate = new Date(newStartDateStr);
             const newEndDate = new Date(newEndDateStr);
 
-            // Set time to start/end of day for accurate range comparison
             newStartDate.setHours(0, 0, 0, 0);
             newEndDate.setHours(23, 59, 59, 999);
-
 
             if (newStartDate > newEndDate) {
                 alert('Start Date cannot be after End Date.');
@@ -1444,7 +1492,7 @@
         }
 
         function resetToYearView() {
-            const currentYear = new Date().getFullYear(); // Get current year dynamically
+            const currentYear = new Date().getFullYear();
             currentGanttStartDate = new Date(`${currentYear}-01-01`);
             currentGanttEndDate = new Date(`${currentYear}-12-31`);
             populateGanttChart(currentGanttStartDate, currentGanttEndDate);
@@ -1465,17 +1513,15 @@
             };
 
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize today's date
+            today.setHours(0, 0, 0, 0);
 
             tasks.forEach(task => {
-                // Check for overdue status first
                 const endDate = new Date(task.endDate);
-                endDate.setHours(23, 59, 59, 999); // Normalize end date to end of day
+                endDate.setHours(23, 59, 59, 999);
 
                 if (task.status !== 'COMPLETE' && task.status !== 'CANCELLED' && endDate < today) {
                     statusColumns['Overdue'].push(task);
                 } else {
-                    // Map existing statuses
                     switch (task.status) {
                         case 'NOT STARTED':
                             statusColumns['Not Started'].push(task);
@@ -1493,7 +1539,6 @@
                             statusColumns['Cancelled'].push(task);
                             break;
                         default:
-                            // Fallback for any unhandled status
                             statusColumns['Not Started'].push(task);
                             break;
                     }
@@ -1536,11 +1581,11 @@
             const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS').length;
             
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize today's date
+            today.setHours(0, 0, 0, 0);
 
             const overdueTasksCount = tasks.filter(task => {
                 const endDate = new Date(task.endDate);
-                endDate.setHours(23, 59, 59, 999); // Normalize end date to end of day
+                endDate.setHours(23, 59, 59, 999);
                 return task.status !== 'COMPLETE' && task.status !== 'CANCELLED' && endDate < today;
             }).length;
 
