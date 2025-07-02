@@ -289,7 +289,7 @@
         .gantt-row {
             display: flex;
             border-bottom: 1px solid #f1f3f5;
-            min-height: 50px;
+            height: 50px; /* FINAL FIX: Use fixed height for consistency */
             align-items: center;
             min-width: 1200px; /* Ensure row matches header width */
         }
@@ -298,7 +298,6 @@
             background: #f8f9fb;
         }
         
-        /* MODIFIED: Changed main task row background and text color for better contrast */
         .gantt-row.main-task-row {
             background: #e0e0e0 !important;
             color: #2c3e50 !important;
@@ -332,13 +331,12 @@
         .gantt-bars {
             flex: 1;
             position: relative;
-            height: 50px;
+            height: 100%;
             display: flex;
             align-items: center;
             min-width: 1000px; /* Adjusted minimum width for bars section */
         }
 
-        /* ADDED: Style for vertical grid lines */
         .gantt-v-line {
             position: absolute;
             top: 0;
@@ -377,7 +375,6 @@
             z-index: 5; /* Keep labels on top */
         }
         
-        /* MODIFIED: Changed progress label color for main task row */
         .main-task-row .gantt-progress-label {
              color: #2c3e50;
         }
@@ -878,7 +875,7 @@
     </div>
 
     <script>
-        // Sample data
+        // FINAL FIX: Standardize all date strings to prevent timezone issues.
         let tasks = [
             {
                 id: 1,
@@ -886,8 +883,8 @@
                 subTask: "Test Sub Task",
                 description: "This is a test task",
                 assignedTo: "John Doe",
-                startDate: "2025-01-01",
-                endDate: "2025-01-15",
+                startDate: "2025-01-01T00:00:00",
+                endDate: "2025-01-15T23:59:59",
                 priority: "HIGH",
                 status: "IN PROGRESS",
                 progress: 25
@@ -898,8 +895,8 @@
                 subTask: "",
                 description: "",
                 assignedTo: "",
-                startDate: "2025-07-01",
-                endDate: "2025-07-15",
+                startDate: "2025-07-01T00:00:00",
+                endDate: "2025-07-15T23:59:59",
                 priority: "MEDIUM",
                 status: "NOT STARTED",
                 progress: 0
@@ -910,8 +907,8 @@
                 subTask: "Collect",
                 description: "Phase 1",
                 assignedTo: "Sumon",
-                startDate: "2025-01-01",
-                endDate: "2025-01-15",
+                startDate: "2025-01-01T00:00:00",
+                endDate: "2025-01-15T23:59:59",
                 priority: "HIGH",
                 status: "IN PROGRESS",
                 progress: 25
@@ -922,8 +919,8 @@
                 subTask: "ETL",
                 description: "",
                 assignedTo: "Sumon",
-                startDate: "2025-01-17",
-                endDate: "2025-01-23",
+                startDate: "2025-01-17T00:00:00",
+                endDate: "2025-01-23T23:59:59",
                 priority: "MEDIUM",
                 status: "IN PROGRESS",
                 progress: 10
@@ -934,8 +931,8 @@
                 subTask: "Collect",
                 description: "",
                 assignedTo: "Chanasak",
-                startDate: "2025-06-01",
-                endDate: "2025-06-05",
+                startDate: "2025-06-01T00:00:00",
+                endDate: "2025-06-05T23:59:59",
                 priority: "LOW",
                 status: "COMPLETE",
                 progress: 100
@@ -946,8 +943,8 @@
                 subTask: "Data Cleansing",
                 description: "",
                 assignedTo: "Chanasak",
-                startDate: "2025-06-11",
-                endDate: "2025-06-18",
+                startDate: "2025-06-11T00:00:00",
+                endDate: "2025-06-18T23:59:59",
                 priority: "LOW",
                 status: "IN PROGRESS",
                 progress: 40
@@ -958,8 +955,8 @@
                 subTask: "Load to Database",
                 description: "",
                 assignedTo: "Chanasak",
-                startDate: "2025-06-20",
-                endDate: "2025-06-27",
+                startDate: "2025-06-20T00:00:00",
+                endDate: "2025-06-27T23:59:59",
                 priority: "LOW",
                 status: "NOT STARTED",
                 progress: 0
@@ -970,105 +967,72 @@
                 subTask: "Finish before due date",
                 description: "This task is intentionally overdue for demonstration.",
                 assignedTo: "Admin",
-                startDate: "2025-06-01",
-                endDate: "2025-06-30", // This date is in the past relative to current date (July 2, 2025)
+                startDate: "2025-06-01T00:00:00",
+                endDate: "2025-06-30T23:59:59", 
                 priority: "HIGH",
                 status: "IN PROGRESS",
                 progress: 50
             }
         ];
 
-        // Global variables for Gantt chart date range
-        let currentGanttStartDate = new Date('2025-01-01');
-        let currentGanttEndDate = new Date('2025-12-31');
-        let taskToDeleteId = null; // To store the ID of the task to be deleted
+        // FINAL FIX: Initialize dates correctly to prevent timezone and duration calculation errors.
+        let currentGanttStartDate = new Date('2025-01-01T00:00:00');
+        let currentGanttEndDate = new Date('2025-12-31T23:59:59');
+        let taskToDeleteId = null;
 
-        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            populateTaskTable();
-            populateGanttChart(); // Initial call without specific dates, uses currentGanttStartDate/EndDate
-            populateKanbanBoard();
-            populateDashboard();
-
-            // Add event listener for form submission
+            populateAllViews();
             const form = document.getElementById('addTaskForm');
             if (form) {
                 form.addEventListener('submit', handleFormSubmit);
             }
-
-            // Add event listener for modal close when clicking outside
             window.addEventListener('click', function(event) {
                 const addTaskModal = document.getElementById('addTaskModal');
                 const confirmModal = document.getElementById('confirmModal');
                 const dateRangeModal = document.getElementById('dateRangeModal');
-
-                if (event.target === addTaskModal) {
-                    closeAddTaskModal();
-                }
-                if (event.target === confirmModal) {
-                    closeConfirmModal();
-                }
-                if (event.target === dateRangeModal) {
-                    closeDateRangeModal();
-                }
+                if (event.target === addTaskModal) closeAddTaskModal();
+                if (event.target === confirmModal) closeConfirmModal();
+                if (event.target === dateRangeModal) closeDateRangeModal();
             });
         });
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            
             const formData = new FormData(e.target);
             const editingId = e.target.dataset.editingId;
 
-            // Validate required fields
             const mainTask = formData.get('mainTask');
             const startDate = formData.get('startDate');
             const endDate = formData.get('endDate');
             const priority = formData.get('priority');
             const status = formData.get('status');
-            const progress = parseInt(formData.get('progress')) || 0;
-
 
             if (!mainTask || !startDate || !endDate || !priority || !status) {
                 alert('Please fill in all required fields');
                 return;
             }
+            
+            const taskData = {
+                mainTask: mainTask,
+                subTask: formData.get('subTask') || '',
+                description: formData.get('description') || '',
+                assignedTo: formData.get('assignedTo') || '',
+                startDate: `${startDate}T00:00:00`,
+                endDate: `${endDate}T23:59:59`,
+                priority: priority,
+                status: status,
+                progress: parseInt(formData.get('progress')) || 0
+            };
 
             if (editingId) {
-                // Update existing task
                 const taskIndex = tasks.findIndex(t => t.id == editingId);
                 if (taskIndex !== -1) {
-                    tasks[taskIndex] = {
-                        id: parseInt(editingId),
-                        mainTask: mainTask,
-                        subTask: formData.get('subTask') || '',
-                        description: formData.get('description') || '',
-                        assignedTo: formData.get('assignedTo') || '',
-                        startDate: startDate,
-                        endDate: endDate,
-                        priority: priority,
-                        status: status,
-                        progress: progress
-                    };
+                    tasks[taskIndex] = { ...tasks[taskIndex], ...taskData };
                 }
             } else {
-                // Add new task
-                const newTask = {
-                    id: Date.now(), // Simple unique ID
-                    mainTask: mainTask,
-                    subTask: formData.get('subTask') || '',
-                    description: formData.get('description') || '',
-                    assignedTo: formData.get('assignedTo') || '',
-                    startDate: startDate,
-                    endDate: endDate,
-                    priority: priority,
-                    status: status,
-                    progress: progress
-                };
-                tasks.push(newTask);
+                tasks.push({ id: Date.now(), ...taskData });
             }
 
-            // Refresh all displays
             populateAllViews();
             closeAddTaskModal();
         }
@@ -1080,44 +1044,28 @@
             populateDashboard();
         }
 
-        // Tab functionality
         function showTab(tabName, clickedTabElement) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            // Show selected tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
-
-            // Add active class to clicked tab
             clickedTabElement.classList.add('active');
-
-            // Refresh content based on tab (ensure gantt is always updated)
             populateAllViews();
         }
 
-        // Task Management Functions
         function populateTaskTable() {
             const tbody = document.getElementById('task-table-body');
             if (!tbody) return;
-            
             tbody.innerHTML = '';
-
             tasks.forEach(task => {
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
-                
                 row.innerHTML = `
                     <td>${task.mainTask}</td>
                     <td>${task.subTask}</td>
                     <td>${task.description}</td>
                     <td>${task.assignedTo}</td>
-                    <td>${task.startDate}</td>
-                    <td>${task.endDate}</td>
+                    <td>${task.startDate.split('T')[0]}</td>
+                    <td>${task.endDate.split('T')[0]}</td>
                     <td><span class="priority-${task.priority.toLowerCase()}">${task.priority}</span></td>
                     <td><span class="status-badge status-${task.status.toLowerCase().replace(/ /g, '-')}">${task.status}</span></td>
                     <td><span class="progress-text">${task.progress}%</span></td>
@@ -1125,14 +1073,9 @@
                         <button class="delete-btn" onclick="openConfirmModal(${task.id})">Delete</button>
                     </td>
                 `;
-                
-                // Add double click event for editing
-                row.addEventListener('dblclick', function(e) {
-                    // Don't edit if clicked on button
-                    if (e.target.tagName === 'BUTTON') return;
-                    editTask(task.id);
+                row.addEventListener('dblclick', (e) => {
+                    if (e.target.tagName !== 'BUTTON') editTask(task.id);
                 });
-                
                 tbody.appendChild(row);
             });
         }
@@ -1156,134 +1099,93 @@
         }
 
         function openAddTaskModal() {
-            // Reset form and modal title before opening
             const form = document.getElementById('addTaskForm');
-            if (form) {
-                form.reset();
-                delete form.dataset.editingId;
-            }
-            const title = document.querySelector('#addTaskModal h2');
-            const button = document.querySelector('#addTaskModal .btn-primary');
-            if (title) title.textContent = 'Add New Task';
-            if (button) button.textContent = 'Add Task';
-
+            form.reset();
+            delete form.dataset.editingId;
+            document.querySelector('#addTaskModal h2').textContent = 'Add New Task';
+            document.querySelector('#addTaskModal .btn-primary').textContent = 'Add Task';
             document.getElementById('addTaskModal').style.display = 'flex';
         }
 
         function closeAddTaskModal() {
-            const modal = document.getElementById('addTaskModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-            const form = document.getElementById('addTaskForm');
-            if (form) {
-                form.reset();
-                delete form.dataset.editingId;
-            }
+            document.getElementById('addTaskModal').style.display = 'none';
         }
 
         function editTask(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
 
-            // Fill the form with existing data
-            const form = document.getElementById('addTaskForm');
-            if (!form) return;
-
-            // Use optional chaining or check for existence before assigning
             document.getElementById('mainTask').value = task.mainTask || '';
             document.getElementById('subTask').value = task.subTask || '';
             document.getElementById('description').value = task.description || '';
             document.getElementById('assignedTo').value = task.assignedTo || '';
-            document.getElementById('startDate').value = task.startDate || '';
-            document.getElementById('endDate').value = task.endDate || '';
+            document.getElementById('startDate').value = task.startDate.split('T')[0];
+            document.getElementById('endDate').value = task.endDate.split('T')[0];
             document.getElementById('priority').value = task.priority || '';
             document.getElementById('status').value = task.status || '';
             document.getElementById('progress').value = task.progress || 0;
 
-            // Change modal title and button text
-            const title = document.querySelector('#addTaskModal h2');
-            const button = document.querySelector('#addTaskModal .btn-primary');
-            if (title) title.textContent = 'Edit Task';
-            if (button) button.textContent = 'Update Task';
-
-            // Store the task ID for updating
-            form.dataset.editingId = taskId;
-
-            // Show modal
-            openAddTaskModal();
+            document.querySelector('#addTaskModal h2').textContent = 'Edit Task';
+            document.querySelector('#addTaskModal .btn-primary').textContent = 'Update Task';
+            document.getElementById('addTaskForm').dataset.editingId = taskId;
+            document.getElementById('addTaskModal').style.display = 'flex';
         }
 
-        // Gantt Chart Functions
         function populateGanttChart(chartStartDate = currentGanttStartDate, chartEndDate = currentGanttEndDate) {
             const container = document.getElementById('gantt-container');
             if (!container) return;
-            
             container.innerHTML = '';
 
-            if (tasks.length === 0) {
-                container.innerHTML = '<div style="padding: 40px; text-align: center; color: #6c7b84;">No tasks available. Add some tasks to see the Gantt chart.</div>';
-                return;
-            }
-
-            const filteredTasks = tasks.filter(task => {
-                const taskStart = new Date(task.startDate);
-                const taskEnd = new Date(task.endDate);
-                return (taskStart <= chartEndDate && taskEnd >= chartStartDate);
-            });
+            const filteredTasks = tasks.filter(task => new Date(task.startDate) <= chartEndDate && new Date(task.endDate) >= chartStartDate);
 
             if (filteredTasks.length === 0) {
                 container.innerHTML = '<div style="padding: 40px; text-align: center; color: #6c7b84;">No tasks in the selected date range.</div>';
                 return;
             }
-            
-            const groupedTasks = {};
-            filteredTasks.forEach(task => {
-                if (!groupedTasks[task.mainTask]) {
-                    groupedTasks[task.mainTask] = [];
-                }
-                groupedTasks[task.mainTask].push(task);
-            });
-            
+
+            const groupedTasks = filteredTasks.reduce((acc, task) => {
+                (acc[task.mainTask] = acc[task.mainTask] || []).push(task);
+                return acc;
+            }, {});
+
             const monthsInView = [];
             let tempDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), 1);
             while (tempDate <= chartEndDate) {
                 monthsInView.push(tempDate.toLocaleString('en-US', { month: 'short', year: 'numeric' }));
                 tempDate.setMonth(tempDate.getMonth() + 1);
             }
-            const uniqueMonths = [...new Set(monthsInView)].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-
-            // MODIFIED: Generate vertical grid lines for month divisions
+            const uniqueMonths = [...new Set(monthsInView)];
+            
+            const totalDuration = chartEndDate.getTime() - chartStartDate.getTime();
             let verticalLinesHtml = '';
-            const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-
-            if (totalDaysInChart > 0) {
-                let tempDateForLines = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), 1);
-                tempDateForLines.setMonth(tempDateForLines.getMonth() + 1); // Start with the first line
-                
-                while (tempDateForLines <= chartEndDate) {
-                    const elapsedDays = (tempDateForLines.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-                    const linePosition = (elapsedDays / totalDaysInChart) * 100;
+            if (totalDuration > 0) {
+                let tempLineDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth() + 1, 1);
+                while (tempLineDate <= chartEndDate) {
+                    const linePosition = ((tempLineDate.getTime() - chartStartDate.getTime()) / totalDuration) * 100;
                     if (linePosition > 0 && linePosition < 100) {
                         verticalLinesHtml += `<div class="gantt-v-line" style="left: ${linePosition}%;"></div>`;
                     }
-                    tempDateForLines.setMonth(tempDateForLines.getMonth() + 1);
+                    tempLineDate.setMonth(tempLineDate.getMonth() + 1);
                 }
             }
-
 
             let html = `
                 <div class="gantt-header">
                     <div class="gantt-task-column">Task</div>
-                    <div class="gantt-timeline" style="width: ${uniqueMonths.length * 80}px;"> ${uniqueMonths.map(month => `<div class="gantt-month">${month}</div>`).join('')}
-                    </div>
+                    <div class="gantt-timeline" style="width: ${uniqueMonths.length * 80}px;"> ${uniqueMonths.map(month => `<div class="gantt-month">${month}</div>`).join('')}</div>
                 </div>
             `;
 
             Object.keys(groupedTasks).forEach(mainTaskName => {
-                const mainTasks = groupedTasks[mainTaskName];
-                const hasSubTasks = mainTasks.some(task => task.subTask);
+                const subTasks = groupedTasks[mainTaskName];
+                const hasSubTasks = subTasks.some(task => task.subTask);
                 
+                const barContainerHtml = (taskOrTasks) => `
+                    <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
+                        ${verticalLinesHtml}
+                        ${Array.isArray(taskOrTasks) ? generateMainTaskBar(taskOrTasks, chartStartDate, totalDuration) : generateTaskBar(taskOrTasks, chartStartDate, totalDuration)}
+                    </div>`;
+
                 if (hasSubTasks) {
                     html += `
                         <div class="gantt-row main-task-row" data-main-task-group="${mainTaskName}">
@@ -1291,48 +1193,30 @@
                                 <button class="expand-btn" onclick="toggleMainTask('${mainTaskName}')">▶</button>
                                 ${mainTaskName}
                             </div>
-                            <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                ${verticalLinesHtml}
-                                ${generateMainTaskBar(mainTasks, chartStartDate, chartEndDate)}
-                            </div>
+                            ${barContainerHtml(subTasks)}
                         </div>
                     `;
-
-                    mainTasks.forEach(task => {
+                    subTasks.forEach(task => {
                         if (task.subTask) {
                             html += `
                                 <div class="gantt-row sub-task-row" data-main-task="${mainTaskName}" style="display: none;">
                                     <div class="gantt-task-name" style="padding-left: 40px;">${task.subTask}</div>
-                                    <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                        ${verticalLinesHtml}
-                                        ${generateTaskBar(task, chartStartDate, chartEndDate)}
-                                    </div>
+                                    ${barContainerHtml(task)}
                                 </div>
                             `;
                         }
                     });
                 } else {
-                    const task = mainTasks[0];
-                    html += `
-                        <div class="gantt-row">
-                            <div class="gantt-task-name">${task.mainTask}</div>
-                            <div class="gantt-bars" style="width: ${uniqueMonths.length * 80}px;">
-                                ${verticalLinesHtml}
-                                ${generateTaskBar(task, chartStartDate, chartEndDate)}
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="gantt-row"><div class="gantt-task-name">${subTasks[0].mainTask}</div>${barContainerHtml(subTasks[0])}</div>`;
                 }
             });
 
             container.innerHTML = html;
 
             const now = new Date();
-            if (now >= chartStartDate && now <= chartEndDate && totalDaysInChart > 0) {
-                const elapsedDays = (now.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-                const currentPosition = (elapsedDays / totalDaysInChart) * 100;
-                const ganttBars = container.querySelectorAll('.gantt-bars');
-                ganttBars.forEach(bar => {
+            if (now >= chartStartDate && now <= chartEndDate && totalDuration > 0) {
+                const currentPosition = ((now.getTime() - chartStartDate.getTime()) / totalDuration) * 100;
+                container.querySelectorAll('.gantt-bars').forEach(bar => {
                     const currentLine = document.createElement('div');
                     currentLine.className = 'current-day-line';
                     currentLine.style.left = `${currentPosition}%`;
@@ -1341,75 +1225,46 @@
             }
         }
 
-        function generateMainTaskBar(tasks, chartStartDate, chartEndDate) {
-            const startDates = tasks.map(task => new Date(task.startDate));
-            const endDates = tasks.map(task => new Date(task.endDate));
-            const earliestStart = new Date(Math.min(...startDates));
-            const latestEnd = new Date(Math.max(...endDates));
-            
-            const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
-            const avgProgress = tasks.length > 0 ? Math.round(totalProgress / tasks.length) : 0;
-            
-            const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDaysInChart <= 0) return '';
+        function generateBar(startDate, endDate, progress, isMain, chartStartDate, totalDuration) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (totalDuration <= 0) return '';
 
-            const startDayInChart = (earliestStart.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            const endDayInChart = (latestEnd.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
+            const startPos = Math.max(0, start.getTime() - chartStartDate.getTime());
+            const endPos = Math.min(totalDuration, end.getTime() - chartStartDate.getTime());
 
-            const actualStartDay = Math.max(0, startDayInChart);
-            const actualEndDay = Math.min(totalDaysInChart, endDayInChart);
-            
-            const startPosition = (actualStartDay / totalDaysInChart) * 100;
-            const width = ((actualEndDay - actualStartDay) / totalDaysInChart) * 100;
-            
-            const labelPosition = startPosition + width;
-            const safeLabelPosition = Math.min(95, labelPosition);
+            const left = (startPos / totalDuration) * 100;
+            const width = ((endPos - startPos) / totalDuration) * 100;
+
+            if (width < 0) return '';
+
+            const labelPosition = Math.min(95, left + width);
 
             return `
-                <div class="gantt-bar main-task" style="left: ${startPosition}%; width: ${width > 0 ? width : 0}%;"></div>
-                <div class="gantt-progress-label" style="left: calc(${safeLabelPosition}% + 5px);">${avgProgress}%</div>
+                <div class="gantt-bar ${isMain ? 'main-task' : 'sub-task'}" style="left: ${left}%; width: ${width}%;"></div>
+                <div class="gantt-progress-label" style="left: calc(${labelPosition}% + 5px);">${progress}%</div>
             `;
         }
 
-        function generateTaskBar(task, chartStartDate, chartEndDate) {
-            const startDate = new Date(task.startDate);
-            const endDate = new Date(task.endDate);
-            
-            const totalDaysInChart = (chartEndDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            if (totalDaysInChart <= 0) return '';
+        function generateMainTaskBar(tasks, chartStartDate, totalDuration) {
+            const startDates = tasks.map(t => new Date(t.startDate).getTime());
+            const endDates = tasks.map(t => new Date(t.endDate).getTime());
+            const earliestStart = new Date(Math.min(...startDates));
+            const latestEnd = new Date(Math.max(...endDates));
+            const avgProgress = tasks.length > 0 ? Math.round(tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length) : 0;
+            return generateBar(earliestStart, latestEnd, avgProgress, true, chartStartDate, totalDuration);
+        }
 
-            const startDayInChart = (startDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-            const endDayInChart = (endDate.getTime() - chartStartDate.getTime()) / (1000 * 60 * 60 * 24);
-
-            const actualStartDay = Math.max(0, startDayInChart);
-            const actualEndDay = Math.min(totalDaysInChart, endDayInChart);
-            
-            const startPosition = (actualStartDay / totalDaysInChart) * 100;
-            const width = ((actualEndDay - actualStartDay) / totalDaysInChart) * 100;
-            
-            const labelPosition = startPosition + width;
-            const safeLabelPosition = Math.min(95, labelPosition);
-
-            return `
-                <div class="gantt-bar sub-task" style="left: ${startPosition}%; width: ${width > 0 ? width : 0}%;"></div>
-                <div class="gantt-progress-label" style="left: calc(${safeLabelPosition}% + 5px);">${task.progress}%</div>
-            `;
+        function generateTaskBar(task, chartStartDate, totalDuration) {
+            return generateBar(task.startDate, task.endDate, task.progress, false, chartStartDate, totalDuration);
         }
 
         function toggleMainTask(mainTaskName) {
             const subTaskRows = document.querySelectorAll(`[data-main-task="${mainTaskName}"]`);
-            const mainTaskRow = document.querySelector(`[data-main-task-group="${mainTaskName}"]`);
-            const expandBtn = mainTaskRow ? mainTaskRow.querySelector('.expand-btn') : null;
-            
-            subTaskRows.forEach(row => {
-                if (row.style.display === 'none') {
-                    row.style.display = 'flex';
-                    if (expandBtn) expandBtn.textContent = '▼';
-                } else {
-                    row.style.display = 'none';
-                    if (expandBtn) expandBtn.textContent = '▶';
-                }
-            });
+            const expandBtn = document.querySelector(`[data-main-task-group="${mainTaskName}"] .expand-btn`);
+            const isHidden = subTaskRows[0]?.style.display === 'none';
+            subTaskRows.forEach(row => row.style.display = isHidden ? 'flex' : 'none');
+            if (expandBtn) expandBtn.textContent = isHidden ? '▼' : '▶';
         }
 
         function openDateRangeModal() {
@@ -1425,144 +1280,79 @@
         function applyDateRange() {
             const newStartDateStr = document.getElementById('modalStartDateInput').value;
             const newEndDateStr = document.getElementById('modalEndDateInput').value;
+            if (!newStartDateStr || !newEndDateStr) return alert('Please select both start and end dates.');
+            
+            const newStartDate = new Date(`${newStartDateStr}T00:00:00`);
+            const newEndDate = new Date(`${newEndDateStr}T23:59:59`);
 
-            if (!newStartDateStr || !newEndDateStr) {
-                alert('Please select both start and end dates.');
-                return;
-            }
-
-            const newStartDate = new Date(newStartDateStr);
-            const newEndDate = new Date(newEndDateStr);
-
-            newStartDate.setHours(0, 0, 0, 0);
-            newEndDate.setHours(23, 59, 59, 999);
-
-            if (newStartDate > newEndDate) {
-                alert('Start Date cannot be after End Date.');
-                return;
-            }
+            if (newStartDate > newEndDate) return alert('Start Date cannot be after End Date.');
 
             currentGanttStartDate = newStartDate;
             currentGanttEndDate = newEndDate;
-            
             populateGanttChart(currentGanttStartDate, currentGanttEndDate);
             closeDateRangeModal();
         }
 
         function resetToYearView() {
             const currentYear = new Date().getFullYear();
-            currentGanttStartDate = new Date(`${currentYear}-01-01`);
-            currentGanttEndDate = new Date(`${currentYear}-12-31`);
+            currentGanttStartDate = new Date(`${currentYear}-01-01T00:00:00`);
+            currentGanttEndDate = new Date(`${currentYear}-12-31T23:59:59`);
             populateGanttChart(currentGanttStartDate, currentGanttEndDate);
         }
 
-        // Kanban Board Functions
         function populateKanbanBoard() {
             const container = document.getElementById('kanban-board-container');
             if (!container) return;
 
             const statusColumns = {
-                'Not Started': [],
-                'In Progress': [],
-                'On Hold': [],
-                'Complete': [],
-                'Overdue': [],
-                'Cancelled': []
+                'Not Started': [], 'In Progress': [], 'On Hold': [], 'Complete': [], 'Overdue': [], 'Cancelled': []
             };
-
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             tasks.forEach(task => {
                 const endDate = new Date(task.endDate);
-                endDate.setHours(23, 59, 59, 999);
-
                 if (task.status !== 'COMPLETE' && task.status !== 'CANCELLED' && endDate < today) {
                     statusColumns['Overdue'].push(task);
-                } else {
-                    switch (task.status) {
-                        case 'NOT STARTED':
-                            statusColumns['Not Started'].push(task);
-                            break;
-                        case 'IN PROGRESS':
-                            statusColumns['In Progress'].push(task);
-                            break;
-                        case 'ON HOLD':
-                            statusColumns['On Hold'].push(task);
-                            break;
-                        case 'COMPLETE':
-                            statusColumns['Complete'].push(task);
-                            break;
-                        case 'CANCELLED':
-                            statusColumns['Cancelled'].push(task);
-                            break;
-                        default:
-                            statusColumns['Not Started'].push(task);
-                            break;
-                    }
+                } else if (statusColumns[task.status]) {
+                    statusColumns[task.status].push(task);
                 }
             });
 
-            let html = '';
-            Object.keys(statusColumns).forEach(status => {
+            container.innerHTML = Object.keys(statusColumns).map(status => {
                 const statusTasks = statusColumns[status];
-                html += `
+                return `
                     <div class="kanban-column">
-                        <div class="kanban-header">
-                            ${status}
-                            <span class="kanban-count">${statusTasks.length}</span>
-                        </div>
+                        <div class="kanban-header">${status}<span class="kanban-count">${statusTasks.length}</span></div>
                         ${statusTasks.map(task => `
                             <div class="kanban-card">
                                 <h4>${task.mainTask}</h4>
                                 ${task.subTask ? `<div class="sub-task">${task.subTask}</div>` : ''}
                                 ${task.assignedTo ? `<div class="assigned-to"><strong>Assigned to:</strong> ${task.assignedTo}</div>` : ''}
                                 <div class="progress"><strong>Progress:</strong> ${task.progress}%</div>
-                                <div class="dates">${task.startDate} - ${task.endDate}</div>
+                                <div class="dates">${task.startDate.split('T')[0]} - ${task.endDate.split('T')[0]}</div>
                             </div>
                         `).join('')}
                     </div>
                 `;
-            });
-
-            container.innerHTML = html;
+            }).join('');
         }
 
-        // Dashboard Functions
         function populateDashboard() {
             const container = document.getElementById('dashboard-grid');
             if (!container) return;
-
             const totalTasks = tasks.length;
-            const completedTasks = tasks.filter(task => task.status === 'COMPLETE').length;
-            const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS').length;
-            
+            const completedTasks = tasks.filter(t => t.status === 'COMPLETE').length;
+            const inProgressTasks = tasks.filter(t => t.status === 'IN PROGRESS').length;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
-            const overdueTasksCount = tasks.filter(task => {
-                const endDate = new Date(task.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                return task.status !== 'COMPLETE' && task.status !== 'CANCELLED' && endDate < today;
-            }).length;
+            const overdueTasksCount = tasks.filter(t => t.status !== 'COMPLETE' && t.status !== 'CANCELLED' && new Date(t.endDate) < today).length;
 
             container.innerHTML = `
-                <div class="dashboard-card">
-                    <h3>${totalTasks}</h3>
-                    <p>Total Tasks</p>
-                </div>
-                <div class="dashboard-card completed">
-                    <h3>${completedTasks}</h3>
-                    <p>Completed</p>
-                </div>
-                <div class="dashboard-card in-progress">
-                    <h3>${inProgressTasks}</h3>
-                    <p>In Progress</p>
-                </div>
-                <div class="dashboard-card overdue">
-                    <h3>${overdueTasksCount}</h3>
-                    <p>Overdue</p>
-                </div>
+                <div class="dashboard-card"><h3>${totalTasks}</h3><p>Total Tasks</p></div>
+                <div class="dashboard-card completed"><h3>${completedTasks}</h3><p>Completed</p></div>
+                <div class="dashboard-card in-progress"><h3>${inProgressTasks}</h3><p>In Progress</p></div>
+                <div class="dashboard-card overdue"><h3>${overdueTasksCount}</h3><p>Overdue</p></div>
             `;
         }
     </script>
