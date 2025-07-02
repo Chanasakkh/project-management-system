@@ -271,9 +271,11 @@
             flex-shrink: 0;
         }
 
+        /* FINAL FIX: Using CSS Grid for potentially better rendering */
         .gantt-timeline {
-            display: flex;
+            display: grid; /* Changed from flex */
             width: 100%;
+            /* grid-template-columns will be set by JS */
         }
 
         .gantt-month {
@@ -854,18 +856,18 @@
 
     <script>
         let tasks = [
-            { id: 1, mainTask: "Test Task", subTask: "Test Sub Task", startDate: "2025-01-01T00:00:00", endDate: "2025-01-15T23:59:59", progress: 25, priority: "HIGH", status: "IN PROGRESS", assignedTo: "John Doe" },
-            { id: 2, mainTask: "API Test Task", subTask: "", startDate: "2025-07-01T00:00:00", endDate: "2025-07-15T23:59:59", progress: 0, priority: "MEDIUM", status: "NOT STARTED", assignedTo: "" },
-            { id: 3, mainTask: "GRI", subTask: "Collect", startDate: "2025-01-01T00:00:00", endDate: "2025-01-15T23:59:59", progress: 25, priority: "HIGH", status: "IN PROGRESS", assignedTo: "Sumon" },
-            { id: 4, mainTask: "GRI", subTask: "ETL", startDate: "2025-01-17T00:00:00", endDate: "2025-01-23T23:59:59", progress: 10, priority: "MEDIUM", status: "IN PROGRESS", assignedTo: "Sumon" },
-            { id: 5, mainTask: "Data Management", subTask: "Collect", startDate: "2025-06-01T00:00:00", endDate: "2025-06-05T23:59:59", progress: 100, priority: "LOW", status: "COMPLETE", assignedTo: "Chanasak" },
-            { id: 6, mainTask: "Data Management", subTask: "Data Cleansing", startDate: "2025-06-11T00:00:00", endDate: "2025-06-18T23:59:59", progress: 40, priority: "LOW", status: "IN PROGRESS", assignedTo: "Chanasak" },
-            { id: 7, mainTask: "Data Management", subTask: "Load to Database", startDate: "2025-06-20T00:00:00", endDate: "2025-06-27T23:59:59", progress: 0, priority: "LOW", status: "NOT STARTED", assignedTo: "Chanasak" },
-            { id: 8, mainTask: "Overdue Task Example", subTask: "Finish before due date", startDate: "2025-06-01T00:00:00", endDate: "2025-06-30T23:59:59", progress: 50, priority: "HIGH", status: "IN PROGRESS", assignedTo: "Admin" }
+            { id: 1, mainTask: "GRI", subTask: "Collect", startDate: "2025-06-15T00:00:00", endDate: "2025-06-30T23:59:59", progress: 90, priority: "HIGH", status: "IN PROGRESS", assignedTo: "Sumon" },
+            { id: 5, mainTask: "Data Management", subTask: "Initial Setup", startDate: "2025-06-01T00:00:00", endDate: "2025-06-05T23:59:59", progress: 100, priority: "LOW", status: "COMPLETE", assignedTo: "Chanasak" },
+            { id: 2, mainTask: "API Development", subTask: "Authentication", startDate: "2025-07-01T00:00:00", endDate: "2025-07-10T23:59:59", progress: 40, priority: "HIGH", status: "IN PROGRESS", assignedTo: "John Doe" },
+            { id: 6, mainTask: "Data Management", subTask: "Data Cleansing", startDate: "2025-07-01T00:00:00", endDate: "2025-07-20T23:59:59", progress: 25, priority: "MEDIUM", status: "IN PROGRESS", assignedTo: "Chanasak" },
+            { id: 7, mainTask: "Data Management", subTask: "Load to Database", startDate: "2025-07-21T00:00:00", endDate: "2025-07-31T23:59:59", progress: 0, priority: "LOW", status: "NOT STARTED", assignedTo: "Chanasak" },
+            { id: 4, mainTask: "GRI", subTask: "ETL Process", startDate: "2025-08-01T00:00:00", endDate: "2025-08-15T23:59:59", progress: 0, priority: "MEDIUM", status: "NOT STARTED", assignedTo: "Sumon" },
+            { id: 3, mainTask: "UI/UX Design", subTask: "User Feedback Review", startDate: "2025-06-25T00:00:00", endDate: "2025-07-05T23:59:59", progress: 50, priority: "MEDIUM", status: "ON HOLD", assignedTo: "Jane Smith" },
+            { id: 8, mainTask: "Marketing", subTask: "Ad Campaign Q3", startDate: "2025-07-01T00:00:00", endDate: "2025-09-30T23:59:59", progress: 0, priority: "LOW", status: "CANCELLED", assignedTo: "Admin" }
         ];
 
-        let currentGanttStartDate = new Date('2025-01-01T00:00:00');
-        let currentGanttEndDate = new Date('2025-12-31T23:59:59');
+        let currentGanttStartDate = new Date('2025-06-01T00:00:00');
+        let currentGanttEndDate = new Date('2025-08-31T23:59:59');
         let taskToDeleteId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1007,8 +1009,14 @@
 
             const totalDurationMs = chartEndDate.getTime() - chartStartDate.getTime();
             if (totalDurationMs <= 0) return;
+            
+            const ganttGrid = document.createElement('div');
+            ganttGrid.className = 'gantt-grid';
 
-            let headerMonthsHtml = '';
+            const timeline = document.createElement('div');
+            timeline.className = 'gantt-timeline';
+
+            let gridColumns = [];
             let tempDateForHeader = new Date(chartStartDate);
             while (tempDateForHeader <= chartEndDate) {
                 const monthStart = new Date(tempDateForHeader.getFullYear(), tempDateForHeader.getMonth(), 1);
@@ -1016,12 +1024,17 @@
                 const effectiveStart = Math.max(monthStart.getTime(), chartStartDate.getTime());
                 const effectiveEnd = Math.min(nextMonthStart.getTime(), chartEndDate.getTime() + 1);
                 const monthDurationInView = effectiveEnd - effectiveStart;
-                const monthWidthPercent = (monthDurationInView / totalDurationMs) * 100;
-                if(monthWidthPercent > 0) {
-                    headerMonthsHtml += `<div class="gantt-month" style="width: ${monthWidthPercent}%;">${monthStart.toLocaleString('en-US', { month: 'short', year: 'numeric' })}</div>`;
+                
+                if (monthDurationInView > 0) {
+                    const monthDiv = document.createElement('div');
+                    monthDiv.className = 'gantt-month';
+                    monthDiv.textContent = monthStart.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                    timeline.appendChild(monthDiv);
+                    gridColumns.push(monthDurationInView);
                 }
                 tempDateForHeader.setMonth(tempDateForHeader.getMonth() + 1);
             }
+            timeline.style.gridTemplateColumns = gridColumns.map(d => `${d}fr`).join(' ');
 
             let verticalLinesHtml = '';
             let tempLineDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth() + 1, 1);
@@ -1045,22 +1058,18 @@
                 }
             });
 
-            const ganttGrid = document.createElement('div');
-            ganttGrid.className = 'gantt-grid';
-            ganttGrid.innerHTML = `<div class="gantt-header"><div class="gantt-task-column">Task</div><div class="gantt-timeline">${headerMonthsHtml}</div></div>${rowsHtml}`;
+            ganttGrid.innerHTML = `<div class="gantt-header"><div class="gantt-task-column">Task</div></div>${rowsHtml}`;
+            ganttGrid.querySelector('.gantt-header').appendChild(timeline);
             
             container.appendChild(ganttGrid);
             
             const now = new Date();
             if (now >= chartStartDate && now <= chartEndDate) {
                 const currentPositionPercent = ((now.getTime() - chartStartDate.getTime()) / totalDurationMs) * 100;
-                const timeline = ganttGrid.querySelector('.gantt-timeline');
-                if (timeline) {
-                    const currentLine = document.createElement('div');
-                    currentLine.className = 'current-day-line';
-                    currentLine.style.left = `calc(200px + ${(timeline.offsetWidth / 100) * currentPositionPercent}px)`;
-                    ganttGrid.appendChild(currentLine);
-                }
+                const currentLine = document.createElement('div');
+                currentLine.className = 'current-day-line';
+                currentLine.style.left = `calc(200px + ${currentPositionPercent}%)`;
+                ganttGrid.appendChild(currentLine);
             }
         }
 
@@ -1115,7 +1124,9 @@
             const today = new Date(); today.setHours(0, 0, 0, 0);
             tasks.forEach(task => {
                 const endDate = new Date(task.endDate);
-                if (task.status !== 'COMPLETE' && task.status !== 'CANCELLED' && endDate < today) {
+                const isOverdue = (task.status === 'IN PROGRESS' || task.status === 'NOT STARTED' || task.status === 'ON HOLD') && endDate < today;
+
+                if (isOverdue) {
                     statusColumns['Overdue'].push(task);
                 } else if (statusColumns[task.status]) {
                     statusColumns[task.status].push(task);
