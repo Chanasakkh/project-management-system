@@ -874,8 +874,9 @@
             window.addEventListener('click', (event) => {
                 const modals = ['addTaskModal', 'confirmModal', 'dateRangeModal'];
                 modals.forEach(id => {
-                    if (event.target === document.getElementById(id)) {
-                        document.getElementById(id).style.display = 'none';
+                    const modal = document.getElementById(id);
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
                     }
                 });
             });
@@ -924,6 +925,7 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             clickedTabElement.classList.add('active');
+            populateAllViews();
         }
 
         function populateTaskTable() {
@@ -1047,15 +1049,19 @@
             ganttGrid.className = 'gantt-grid';
             ganttGrid.innerHTML = `<div class="gantt-header"><div class="gantt-task-column">Task</div><div class="gantt-timeline">${headerMonthsHtml}</div></div>${rowsHtml}`;
             
+            container.appendChild(ganttGrid);
+            
             const now = new Date();
             if (now >= chartStartDate && now <= chartEndDate) {
                 const currentPositionPercent = ((now.getTime() - chartStartDate.getTime()) / totalDurationMs) * 100;
-                const currentLine = document.createElement('div');
-                currentLine.className = 'current-day-line';
-                currentLine.style.left = `calc(200px + ${(timeline.offsetWidth / 100) * currentPositionPercent}px)`;
-                ganttGrid.appendChild(currentLine);
+                const timeline = ganttGrid.querySelector('.gantt-timeline');
+                if (timeline) {
+                    const currentLine = document.createElement('div');
+                    currentLine.className = 'current-day-line';
+                    currentLine.style.left = `calc(200px + ${(timeline.offsetWidth / 100) * currentPositionPercent}px)`;
+                    ganttGrid.appendChild(currentLine);
+                }
             }
-            container.appendChild(ganttGrid);
         }
 
         function generateBar(startDate, endDate, progress, isMain, chartStartDate, totalDurationMs) {
@@ -1072,10 +1078,36 @@
         function generateMainTaskBar(tasks, chartStartDate, totalDurationMs) { const startDates = tasks.map(t => new Date(t.startDate).getTime()); const endDates = tasks.map(t => new Date(t.endDate).getTime()); const earliestStart = new Date(Math.min(...startDates)); const latestEnd = new Date(Math.max(...endDates)); const avgProgress = tasks.length > 0 ? Math.round(tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length) : 0; return generateBar(earliestStart, latestEnd, avgProgress, true, chartStartDate, totalDurationMs); }
         function generateTaskBar(task, chartStartDate, totalDurationMs) { return generateBar(task.startDate, task.endDate, task.progress, false, chartStartDate, totalDurationMs); }
         function toggleMainTask(mainTaskName) { const rows = document.querySelectorAll(`[data-main-task="${mainTaskName}"]`); const btn = document.querySelector(`[data-main-task-group="${mainTaskName}"] .expand-btn`); if(!rows.length || !btn) return; const isHidden = rows[0].style.display === 'none'; rows.forEach(r => r.style.display = isHidden ? 'flex' : 'none'); btn.textContent = isHidden ? '▼' : '▶'; }
-        function openDateRangeModal() { document.getElementById('modalStartDateInput').value = currentGanttStartDate.toISOString().split('T')[0]; document.getElementById('modalEndDateInput').value = currentGanttEndDate.toISOString().split('T')[0]; document.getElementById('dateRangeModal').style.display = 'flex'; }
-        function closeDateRangeModal() { document.getElementById('dateRangeModal').style.display = 'none'; }
-        function applyDateRange() { const start = document.getElementById('modalStartDateInput').value; const end = document.getElementById('modalEndDateInput').value; if (!start || !end) return alert('Please select both start and end dates.'); const newStart = new Date(`${start}T00:00:00`); const newEnd = new Date(`${end}T23:59:59`); if (newStart > newEnd) return alert('Start Date cannot be after End Date.'); currentGanttStartDate = newStart; currentGanttEndDate = newEnd; populateGanttChart(); closeDateRangeModal(); }
-        function resetToYearView() { const year = new Date().getFullYear(); currentGanttStartDate = new Date(`${year}-01-01T00:00:00`); currentGanttEndDate = new Date(`${year}-12-31T23:59:59`); populateGanttChart(); }
+        
+        function openDateRangeModal() {
+            document.getElementById('modalStartDateInput').value = currentGanttStartDate.toISOString().split('T')[0];
+            document.getElementById('modalEndDateInput').value = currentGanttEndDate.toISOString().split('T')[0];
+            document.getElementById('dateRangeModal').style.display = 'flex';
+        }
+        
+        function closeDateRangeModal() {
+            document.getElementById('dateRangeModal').style.display = 'none';
+        }
+        
+        function applyDateRange() {
+            const start = document.getElementById('modalStartDateInput').value;
+            const end = document.getElementById('modalEndDateInput').value;
+            if (!start || !end) return alert('Please select both start and end dates.');
+            const newStart = new Date(`${start}T00:00:00`);
+            const newEnd = new Date(`${end}T23:59:59`);
+            if (newStart > newEnd) return alert('Start Date cannot be after End Date.');
+            currentGanttStartDate = newStart;
+            currentGanttEndDate = newEnd;
+            populateGanttChart();
+            closeDateRangeModal();
+        }
+
+        function resetToYearView() {
+            const year = new Date().getFullYear();
+            currentGanttStartDate = new Date(`${year}-01-01T00:00:00`);
+            currentGanttEndDate = new Date(`${year}-12-31T23:59:59`);
+            populateGanttChart();
+        }
         
         function populateKanbanBoard() {
             const container = document.getElementById('kanban-board-container');
